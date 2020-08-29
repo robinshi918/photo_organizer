@@ -2,7 +2,7 @@
 export photo from Mac Photo folder
 
 method:
-1. traverse Mac Photo folder  /Users/shiyun/Pictures/照片图库.photoslibrary/Masters
+1. traverse Mac Photo folder 
 2. read create_time tag from exif
        get the time and parse the date time
 1. mkdir in target folder
@@ -21,21 +21,21 @@ import exifread
 ## CONFIG FLAGS
 ########################
 DEBUG = True
-DELETE_AFTER_COPY = True
+DELETE_AFTER_COPY = False
 IS_PHOTO = False
 ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-TARGET_BASE_DIR = "/Users/shiyun/Desktop/export_iPhone_photo/"
-SRC_DIR = "/Users/shiyun/Desktop/500G/[0_Foto/iPhone4S_Foto"
+TARGET_BASE_DIR = "/Users/robinshi/Desktop/20202829_export/"
+SRC_DIR = "/Users/robinshi/Desktop/20200829_robin_iphone_export/"
 
 
 if IS_PHOTO:
     ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-    TARGET_BASE_DIR = "/Users/shiyun/Desktop/export_iPhone_photo/"
-    SRC_DIR = "/Users/shiyun/Pictures/照片图库.photoslibrary/Masters"
+    TARGET_BASE_DIR = "/Users/robinshi/Desktop/20202829_export/photo/"
+    SRC_DIR = "/Users/robinshi/Desktop/20200829_robin_iphone_export/"
 else:
     ACCEPTED_FILES = ['.mp4', '.mov']
-    TARGET_BASE_DIR = "/Users/shiyun/Desktop/export_iPhone_video/"
-    SRC_DIR = "/Users/shiyun/Pictures/照片图库.photoslibrary/Masters"
+    TARGET_BASE_DIR = "/Users/robinshi/Desktop/20202829_export/video/"
+    SRC_DIR = "/Users/robinshi/Desktop/20200829_robin_iphone_export/"
 
 TOTAL_FILE_NUM = 0
 CURRENT_PROGRESS = 0
@@ -45,7 +45,7 @@ def log(text):
     log method
     """
     if DEBUG:
-        print text
+        print(text)
 
 def get_file_modification_time(file_path):
     """
@@ -114,7 +114,7 @@ def scan_folder(base_folder):
                 #     print src_file_path + "-->" + target_folder
                 copy(src_file_path, target_folder, fname)
     time_elapsed = time.time() - start_time
-    print str(time_elapsed) + "seconds used"
+    print(str(time_elapsed) + "seconds used")
 
 def is_accept_type(file_name):
     """
@@ -179,7 +179,7 @@ def get_file_size(file_path):
 
 
 def initialize():
-    print "Initializing......"
+    print("Initializing......")
     total_size = 0
     start_time = time.time()
     global TOTAL_FILE_NUM
@@ -189,12 +189,12 @@ def initialize():
                 TOTAL_FILE_NUM = TOTAL_FILE_NUM + 1
                 total_size += os.path.getsize(os.path.join(dirpaths, fname))
     time_ellapsed = time.time() - start_time
-    print "initialization Done! " + str(TOTAL_FILE_NUM) + " files to export(" + str(total_size) + " Bytes) - (" + str(time_ellapsed) +" seconds)"
+    print ("initialization Done! " + str(TOTAL_FILE_NUM) + " files to export(" + str(total_size) + " Bytes) - (" + str(time_ellapsed) +" seconds)")
 
 initialize()
 scan_folder(SRC_DIR)
 
-print "END"
+print ("END")
 
 
 
