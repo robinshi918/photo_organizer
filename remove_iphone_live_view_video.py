@@ -6,7 +6,7 @@ import time
 import shutil
 import exifread
 import re
-from datetime import datetime
+import datetime
 
 """
 remove mov files when below 2 conditions are met:
@@ -22,20 +22,6 @@ remove mov files when below 2 conditions are met:
 #         return md5(file1) == md5(file2)
 #     return False
 
-# check if there is another jpg file has with same name
-def is_file_suspicious(file_name):
-    if file_name.endswith(".mov"):
-        name_without_ext = re.sub(".mov", "", file_name)
-        print("name_without_ext: " + name_without_ext)
-
-        return True
-    return False
-
-
-
-
-def rip_suspicious_file(file_name):
-    return re.sub(" *\(\d+\)", "", file_name)
 
 def mkdir(directory):
     """
@@ -59,7 +45,7 @@ def get_file_modification_time(file_path):
     timestamp = os.path.getmtime(file_path)
     time_string = datetime.datetime.fromtimestamp(
         int(os.path.getmtime(file_path))
-        ).strftime('%Y:%m:%d %H')
+        ).strftime('%Y-%m-%d %H:%M:%S')
     return time_string
 
 def read_photo_date(file_name):
@@ -77,22 +63,17 @@ def read_photo_date(file_name):
         date_time = get_file_modification_time(file_name)
         # date time info is not valid in exif, try to get file's create time
 
-    # log(str(date_time) + "--->" + str(file_name))
-
     #parse date time string and returns tuple
     words = str(date_time).split(' ')[0].split(':')  #2013:11:16 17:44:16
     if len(words) == 3:
-        y = words[0]
-        m = words[1]
-        d = words[2]
+        result = datetime.datetime.strptime(str(date_time), '%Y:%m:%d %H:%M:%S')
     else:
-        words = str(date_time).split(' ')[0].split('-')  # 2015-01-08 16:05:13
-        y = words[0]
-        m = words[1]
-        d = words[2]
+        result = datetime.datetime.strptime(str(date_time), '%Y-%m-%d %H:%M:%S')
+    return result
+        
 
-    #returns a tuple
-    return y, m, d
+def is_in_same_day(datetime1, datetime2):
+    return abs((datetime1 - datetime2).total_seconds()) < (60 * 60 * 24)
 
 counter = 1
 for dirpaths, dirnames, filenames in os.walk(base_folder):
@@ -106,12 +87,15 @@ for dirpaths, dirnames, filenames in os.walk(base_folder):
             jpeg_full_path = os.path.join(dirpaths, jpeg_name)
 
             if os.path.exists(jpeg_full_path):
-                mov_year, mov_month, mov_day = read_photo_date(mov_full_path)
-                jpg_year, jpg_month, jpg_day = read_photo_date(jpeg_full_path)
+                mov_datetime = read_photo_date(mov_full_path)
+                jpg_datetime = read_photo_date(jpeg_full_path)
+                
+                counter += 1
+                
+                if is_in_same_day(mov_datetime, jpg_datetime):
+                    # print("[" + str(counter) +"]deleting " + mov_full_path)
+                    throw_to_rubbish(mov_full_path)
+                    
+                
 
-                if mov_year == jpg_year and mov_month == jpg_month and mov_day == jpg_day:
-                    print("[" + str(counter) +"]deleting " + mov_full_path)
-                    # throw_to_rubbish(mov_full_path)
-                    counter += 1
-                else:
-                    print(fname)
+
