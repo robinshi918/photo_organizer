@@ -21,21 +21,21 @@ import exifread
 ## CONFIG FLAGS
 ########################
 DEBUG = True
-DELETE_AFTER_COPY = False
+DELETE_AFTER_COPY = True
 IS_PHOTO = False
 ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-TARGET_BASE_DIR = "/Users/robinshi/Desktop/20202829_export/"
+TARGET_BASE_DIR = "/Users/robinshi/Desktop/2021_export/"
 SRC_DIR = "/Users/robinshi/Desktop/20200829_robin_iphone_export/"
 
 
 if IS_PHOTO:
     ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-    TARGET_BASE_DIR = "/Users/robinshi/Desktop/20202829_export/photo/"
-    SRC_DIR = "/Users/robinshi/Desktop/20200829_robin_iphone_export/"
+    TARGET_BASE_DIR = "/Users/robinshi/Desktop/Photos_Organise/iPhone_export_20211230_processed/photo"
+    SRC_DIR = "/Users/robinshi/Desktop/Photos_Organise/iPhone_export_20211230"
 else:
     ACCEPTED_FILES = ['.mp4', '.mov']
-    TARGET_BASE_DIR = "/Users/robinshi/Desktop/20202829_export/video/"
-    SRC_DIR = "/Users/robinshi/Desktop/20200829_robin_iphone_export/"
+    TARGET_BASE_DIR = "/Users/robinshi/Desktop/Photos_Organise/iPhone_export_20211230_processed/video"
+    SRC_DIR = "/Users/robinshi/Desktop/Photos_Organise/iPhone_export_20211230"
 
 TOTAL_FILE_NUM = 0
 CURRENT_PROGRESS = 0
@@ -108,8 +108,7 @@ def scan_folder(base_folder):
             if is_accept_type(fname):
                 src_file_path = os.path.join(dirpaths, fname)
                 year, month, day = read_photo_date(src_file_path)
-                target_folder = TARGET_BASE_DIR + str(year) + '_' \
-                    + str(month) + '/'
+                target_folder = os.path.join(TARGET_BASE_DIR, str(year) + '_' + str(month) + '/')
                 # if year == "2002":
                 #     print src_file_path + "-->" + target_folder
                 copy(src_file_path, target_folder, fname)
