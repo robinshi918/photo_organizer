@@ -16,6 +16,7 @@ import hashlib
 import time
 import shutil
 import exifread
+import re
 
 ########################
 ## CONFIG FLAGS
@@ -30,12 +31,12 @@ SRC_DIR = "/Users/robinshi/Desktop/20200829_robin_iphone_export/"
 
 if IS_PHOTO:
     ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-    TARGET_BASE_DIR = "/Users/robinshi/Desktop/Photos_Organise/iPhone_export_20211230_processed/photo"
-    SRC_DIR = "/Users/robinshi/Desktop/Photos_Organise/iPhone_export_20211230"
+    TARGET_BASE_DIR = "/Users/robinshi/Desktop/Photos_Organise/Yuan_phone_photo_20220102_processed/photo"
+    SRC_DIR = "/Users/robinshi/Desktop/Photos_Organise/Yuan_phone_photo_20220102"
 else:
     ACCEPTED_FILES = ['.mp4', '.mov']
-    TARGET_BASE_DIR = "/Users/robinshi/Desktop/Photos_Organise/iPhone_export_20211230_processed/video"
-    SRC_DIR = "/Users/robinshi/Desktop/Photos_Organise/iPhone_export_20211230"
+    TARGET_BASE_DIR = "/Users/robinshi/Desktop/Photos_Organise/Yuan_phone_photo_20220102_processed/video"
+    SRC_DIR = "/Users/robinshi/Desktop/Photos_Organise/Yuan_video/2022_01"
 
 TOTAL_FILE_NUM = 0
 CURRENT_PROGRESS = 0
@@ -58,6 +59,33 @@ def get_file_modification_time(file_path):
     return time_string
 
 
+#'VID_20191123_180729.mp4'
+def get_timestamp_from_mp4(file_name):
+    pattern = 'VID_\d{8}_\d{6}.mp4'
+    result = re.match(pattern, file_name)
+
+    if result:
+        parts = file_name.split('.')[0].split('_')
+        print(parts)
+        _date = parts[1]
+        _time = parts[2]
+        
+        print("date = " + str(_date))
+        print("time = " + str(_time))
+        y = _date[0:4]
+        month = _date[4:6]
+        d = _date[6:8]        
+
+        h = _time[0:2]
+        minute = _time[2:4]
+        s = _time[4:6]
+
+        #2013:11:16 17:44:16
+        return y + ':' + month + ':' + d + ' ' + h + ':' + minute + ':' + s
+    else:
+        return ""
+
+
 def read_photo_date(file_name):
     """
     read the file and return the year, month, day tuple
@@ -70,8 +98,10 @@ def read_photo_date(file_name):
     try:
         date_time = tags['EXIF DateTimeOriginal']
     except KeyError:
-        date_time = get_file_modification_time(file_name)
-        # date time info is not valid in exif, try to get file's create time
+        date_time  = get_timestamp_from_mp4(os.path.basename(file_name))
+        if date_time == "":
+            # date time info is not valid in exif, try to get file's create time
+            date_time = get_file_modification_time(file_name)
 
     log(str(date_time) + "--->" + str(file_name))
 
@@ -109,8 +139,6 @@ def scan_folder(base_folder):
                 src_file_path = os.path.join(dirpaths, fname)
                 year, month, day = read_photo_date(src_file_path)
                 target_folder = os.path.join(TARGET_BASE_DIR, str(year) + '_' + str(month) + '/')
-                # if year == "2002":
-                #     print src_file_path + "-->" + target_folder
                 copy(src_file_path, target_folder, fname)
     time_elapsed = time.time() - start_time
     print(str(time_elapsed) + "seconds used")
@@ -194,8 +222,6 @@ initialize()
 scan_folder(SRC_DIR)
 
 print ("END")
-
-
 
 
 
