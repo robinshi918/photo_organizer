@@ -7,7 +7,6 @@ method:
        get the time and parse the date time
 1. mkdir in target folder
 2. copy image to target folder
-
 """
 
 import os
@@ -18,10 +17,12 @@ import shutil
 import exifread
 import re
 
+
+
 ########################
 ## CONFIG FLAGS
 ########################
-DEBUG = True
+PRINT_DEBUG = True
 DELETE_AFTER_COPY = True
 IS_PHOTO = False
 ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
@@ -45,7 +46,7 @@ def log(text):
     """
     log method
     """
-    if DEBUG:
+    if PRINT_DEBUG:
         print(text)
 
 def get_file_modification_time(file_path):
