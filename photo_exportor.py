@@ -1,6 +1,18 @@
 """
 export photo from Mac Photo folder
 
+Preparation:
+1. connect iPhone with Mac
+2. Open Photos app on Mac
+3. Go to "Devices", and open the iPhone device
+4. cmd+a to select all files, then Import all photos from iPhone to Mac
+5. go to "Library"
+6. select all files by cmd+a
+7. Open "File > Export > Export Unmodified Originals for xxx Items". In the Export dialog, use default options and click "Export" button
+8. Select the export target folder
+9. Wait until export finishes
+
+
 method:
 1. traverse Mac Photo folder 
 2. read create_time tag from exif
@@ -23,21 +35,19 @@ import re
 ## CONFIG FLAGS
 ########################
 PRINT_DEBUG = True
-DELETE_AFTER_COPY = True
+DELETE_AFTER_COPY = False
 IS_PHOTO = False
 ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-TARGET_BASE_DIR = "/Users/robinshi/Desktop/2021_export/"
-SRC_DIR = "/Users/robinshi/Desktop/20200829_robin_iphone_export/"
+TARGET_BASE_DIR = ""
+SRC_DIR = "/Users/robin/Desktop/iPhone_export"
 
 
 if IS_PHOTO:
     ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-    TARGET_BASE_DIR = "/Users/robinshi/Desktop/Photos_Organise/Yuan_phone_photo_20220102_processed/photo"
-    SRC_DIR = "/Users/robinshi/Desktop/Photos_Organise/Yuan_phone_photo_20220102"
+    TARGET_BASE_DIR = "/Users/robin/Desktop/iPhone_Photos"
 else:
     ACCEPTED_FILES = ['.mp4', '.mov']
-    TARGET_BASE_DIR = "/Users/robinshi/Desktop/Photos_Organise/Yuan_phone_photo_20220102_processed/video"
-    SRC_DIR = "/Users/robinshi/Desktop/Photos_Organise/Yuan_video/2022_01"
+    TARGET_BASE_DIR = "/Users/robin/Desktop/iPhone_Videos"
 
 TOTAL_FILE_NUM = 0
 CURRENT_PROGRESS = 0
