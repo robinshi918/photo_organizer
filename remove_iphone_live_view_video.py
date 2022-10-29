@@ -30,8 +30,8 @@ def mkdir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-base_folder = "/Users/robinshi/Desktop/iphone_export"
-rubbish_bin = "/Users/robinshi/Desktop/photo_organizer/live_view_videos"
+base_folder = "/Users/robin/Desktop/iPhone_export"
+rubbish_bin = "/Users/robin/Desktop/photo_organizer/live_view_videos"
 
 def throw_to_rubbish(path):
     print("deleting " + path)

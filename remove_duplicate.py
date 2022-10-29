@@ -21,7 +21,7 @@ def is_file_suspicious(file_name):
 
 def rip_suspicious_file(file_name):
     return re.sub(" *\(\d+\)", "", file_name)
-
+ 
 def mkdir(directory):
     """
     create a folder if not exist
@@ -29,8 +29,8 @@ def mkdir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-base_folder = "/Users/robinshi/Desktop/iphone_export"
-rubbish_bin = "/Users/robinshi/Desktop/photo_organizer/rubbish_bin"
+base_folder = "/Users/robin/Desktop/iPhone_export"
+rubbish_bin = "/Users/robin/Desktop/photo_organizer/rubbish_bin"
 
 def throw_to_rubbish(path):
     print("deleting " + path)
