@@ -36,7 +36,7 @@ import re
 ########################
 PRINT_DEBUG = True
 DELETE_AFTER_COPY = False
-IS_PHOTO = True
+IS_PHOTO = False
 ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
 TARGET_BASE_DIR = ""
 SRC_DIR = "/Users/robin/Desktop/pixel5_photos_backup"
@@ -70,31 +70,37 @@ def get_file_modification_time(file_path):
     return time_string
 
 
-#'VID_20191123_180729.mp4'
+# parse timestamp informatim from mp4 file name.
+# Different file name patterns are supported. 
 def get_timestamp_from_mp4(file_name):
-    pattern = 'VID_\d{8}_\d{6}.mp4'
-    result = re.match(pattern, file_name)
+    # VID_20191123_180729.mp4
+    pattern1 = 'VID_\d{8}_\d{6}.mp4'
+    # PXL_20220716_022258560.mp4
+    pattern2 = 'PXL_\d{8}_\d+.mp4'
+    # lv_0_20220609160914.mp4
+    pattern3 = 'lv_0_\d{14}.mp4'
+    # PXL_20220103_191748636.LS.mp4
+    pattern4 = 'PXL_\d{8}_\d+.LS.mp4'
 
-    if result:
-        parts = file_name.split('.')[0].split('_')
-        print(parts)
-        _date = parts[1]
-        _time = parts[2]
-        
-        print("date = " + str(_date))
-        print("time = " + str(_time))
-        y = _date[0:4]
-        month = _date[4:6]
-        d = _date[6:8]        
+    _date = ""
 
-        h = _time[0:2]
-        minute = _time[2:4]
-        s = _time[4:6]
-
-        #2013:11:16 17:44:16
-        return y + ':' + month + ':' + d + ' ' + h + ':' + minute + ':' + s
+    if re.match(pattern1, file_name) or re.match(pattern2, file_name) or re.match(pattern4, file_name):
+        _date = file_name.split('.')[0].split('_')[1]
+    elif re.match(pattern3, file_name):
+        _date = file_name.split('.')[0].split('_')[2][0:7]
     else:
         return ""
+  
+    
+    y = _date[0:4]
+    m = _date[4:6]
+    d = _date[6:8]        
+    # return result: 2013:11:16 00:00:00
+    return y + ':' + m + ':' + d + ' ' + '00:00:00'
+
+
+
+
 
 
 def read_photo_date(file_name):
@@ -113,6 +119,7 @@ def read_photo_date(file_name):
         if date_time == "":
             # date time info is not valid in exif, try to get file's create time
             date_time = get_file_modification_time(file_name)
+    
 
     log(str(date_time) + "--->" + str(file_name))
 
@@ -232,7 +239,7 @@ def initialize():
 initialize()
 scan_folder(SRC_DIR)
 
-print ("END")
+print ("### END")
 
 
 
