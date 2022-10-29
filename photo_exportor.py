@@ -36,18 +36,18 @@ import re
 ########################
 PRINT_DEBUG = True
 DELETE_AFTER_COPY = False
-IS_PHOTO = False
+IS_PHOTO = True
 ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
 TARGET_BASE_DIR = ""
-SRC_DIR = "/Users/robin/Desktop/iPhone_export"
+SRC_DIR = "/Users/robin/Desktop/pixel5_photos_backup"
 
 
 if IS_PHOTO:
     ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-    TARGET_BASE_DIR = "/Users/robin/Desktop/iPhone_Photos"
+    TARGET_BASE_DIR = "/Users/robin/Desktop/pixel5_photos_backup/pixel_Photos"
 else:
     ACCEPTED_FILES = ['.mp4', '.mov']
-    TARGET_BASE_DIR = "/Users/robin/Desktop/iPhone_Videos"
+    TARGET_BASE_DIR = "/Users/robin/Desktop/pixel5_photos_backup/pixel_Videos"
 
 TOTAL_FILE_NUM = 0
 CURRENT_PROGRESS = 0
@@ -152,7 +152,7 @@ def scan_folder(base_folder):
                 target_folder = os.path.join(TARGET_BASE_DIR, str(year) + '_' + str(month) + '/')
                 copy(src_file_path, target_folder, fname)
     time_elapsed = time.time() - start_time
-    print(str(time_elapsed) + "seconds used")
+    print(str(time_elapsed) + " seconds used")
 
 def is_accept_type(file_name):
     """
