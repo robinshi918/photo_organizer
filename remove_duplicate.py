@@ -29,8 +29,8 @@ def mkdir(directory):
     if not os.path.exists(directory):
         os.makedirs(directory)
 
-base_folder = "/Users/robin/Desktop/iPhone_export"
-rubbish_bin = "/Users/robin/Desktop/photo_organizer/rubbish_bin"
+base_folder = "/Users/robin/Desktop/iphone_export_20230121/origin"
+rubbish_bin = "/Users/robin/Desktop/iphone_export_20230121/rubbish"
 
 def throw_to_rubbish(path):
     print("deleting " + path)

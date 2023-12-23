@@ -12,6 +12,10 @@ Preparation:
 8. Select the export target folder
 9. Wait until export finishes
 
+Preparation on Apple Sillicon:
+1. do not use exifread 3+, it will cause HEIC parsing error.
+   pip install "exifread<3"
+
 
 method:
 1. traverse Mac Photo folder 
@@ -35,19 +39,19 @@ import re
 ## CONFIG FLAGS
 ########################
 PRINT_DEBUG = True
-DELETE_AFTER_COPY = False
-IS_PHOTO = False
+DELETE_AFTER_COPY = True
+IS_PHOTO = True
 ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
 TARGET_BASE_DIR = ""
-SRC_DIR = "/Users/robin/Desktop/pixel5_photos_backup"
+SRC_DIR = "/Users/robin/Desktop/20231223_robin_photo_backup/source"
 
 
 if IS_PHOTO:
     ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-    TARGET_BASE_DIR = "/Users/robin/Desktop/pixel5_photos_backup/pixel_Photos"
+    TARGET_BASE_DIR = "/Users/robin/Desktop/20231223_robin_photo_backup/photos"
 else:
     ACCEPTED_FILES = ['.mp4', '.mov']
-    TARGET_BASE_DIR = "/Users/robin/Desktop/pixel5_photos_backup/pixel_Videos"
+    TARGET_BASE_DIR = "/Users/robin/Desktop/20231223_robin_photo_backup/videos"
 
 TOTAL_FILE_NUM = 0
 CURRENT_PROGRESS = 0
@@ -111,10 +115,16 @@ def read_photo_date(file_name):
     fd = open(file_name, 'rb')
 
     # Return Exif tags
-    tags = exifread.process_file(fd)
+    
     try:
+        tags = exifread.process_file(fd)
         date_time = tags['EXIF DateTimeOriginal']
     except KeyError:
+        date_time  = get_timestamp_from_mp4(os.path.basename(file_name))
+        if date_time == "":
+            # date time info is not valid in exif, try to get file's create time
+            date_time = get_file_modification_time(file_name)
+    except AttributeError:
         date_time  = get_timestamp_from_mp4(os.path.basename(file_name))
         if date_time == "":
             # date time info is not valid in exif, try to get file's create time
