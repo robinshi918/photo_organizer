@@ -40,18 +40,21 @@ import re
 ########################
 PRINT_DEBUG = True
 DELETE_AFTER_COPY = True
-IS_PHOTO = True
+IS_PHOTO = False
 ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
 TARGET_BASE_DIR = ""
-SRC_DIR = "/Users/robin/Desktop/20231223_robin_photo_backup/source"
+SRC_DIR = ""
 
 
 if IS_PHOTO:
-    ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp']
-    TARGET_BASE_DIR = "/Users/robin/Desktop/20231223_robin_photo_backup/photos"
+    ACCEPTED_FILES = ['.jpg', '.jpeg', '.png', '.bmp', '.gif']
+    TARGET_BASE_DIR = "/Users/robin/Desktop/20240728-export-photo/export/pixel_Photos/"
+    SRC_DIR = "/Users/robin/Desktop/20240728-export-photo/original"
 else:
     ACCEPTED_FILES = ['.mp4', '.mov']
-    TARGET_BASE_DIR = "/Users/robin/Desktop/20231223_robin_photo_backup/videos"
+    TARGET_BASE_DIR = "/Users/robin/Desktop/20240728-export-photo/export/pixel_Videos/"
+    SRC_DIR = "/Users/robin/Desktop/20240728-export-photo/original"
+
 
 TOTAL_FILE_NUM = 0
 CURRENT_PROGRESS = 0
@@ -73,7 +76,6 @@ def get_file_modification_time(file_path):
         ).strftime('%Y:%m:%d %H')
     return time_string
 
-
 # parse timestamp informatim from mp4 file name.
 # Different file name patterns are supported. 
 def get_timestamp_from_mp4(file_name):
@@ -85,13 +87,36 @@ def get_timestamp_from_mp4(file_name):
     pattern3 = 'lv_0_\d{14}.mp4'
     # PXL_20220103_191748636.LS.mp4
     pattern4 = 'PXL_\d{8}_\d+.LS.mp4'
+    # PXL_20231218_223305330.TS.mp4 - pixel 7 files
+    pattern5 = 'PXL_\d{8}_\d+.TS.mp4'
+    # 2024_01_22_15_04_24_BF72E39.mp4 - 360dashboard files
+    pattern6 = '\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}_\w+.mp4'
+    # mmexport1719077301565.mp4
+    pattern7 = 'mmexport\d+.mp4'
+    # wx_camera_1727655715780.mp4
+    pattern8 = 'wx_camera_\d+.mp4'
+
 
     _date = ""
 
-    if re.match(pattern1, file_name) or re.match(pattern2, file_name) or re.match(pattern4, file_name):
+    if re.match(pattern1, file_name) or re.match(pattern2, file_name) or re.match(pattern4, file_name) or re.match(pattern5, file_name):
         _date = file_name.split('.')[0].split('_')[1]
     elif re.match(pattern3, file_name):
         _date = file_name.split('.')[0].split('_')[2][0:7]
+    elif re.match(pattern6, file_name):
+        _date = file_name.split(".")[0][0:11].replace("_", "")
+    elif re.match(pattern7, file_name):
+        epoch_timestamp = file_name.split(".")[0].replace("mmexport", "")
+        # Convert from milliseconds to seconds
+        epoch_timestamp = int(epoch_timestamp) // 1000
+        dt_object = datetime.datetime.utcfromtimestamp(epoch_timestamp)
+        _date = dt_object.strftime('%Y%m%d')
+    elif re.match(pattern8, file_name):
+        epoch_timestamp = file_name.split(".")[0].replace("wx_camera_", "")
+        # Convert from milliseconds to seconds
+        epoch_timestamp = int(epoch_timestamp) // 1000
+        dt_object = datetime.datetime.utcfromtimestamp(epoch_timestamp)
+        _date = dt_object.strftime('%Y%m%d')
     else:
         return ""
   
@@ -104,8 +129,20 @@ def get_timestamp_from_mp4(file_name):
 
 
 
+def is_wechat_file(file_name):
+    return file_name.startswith("mmexport") or file_name.startswith("wx_camera_")
 
+def get_wechat_file_date(file_name):
+    pattern = ""
+    if file_name.startswith("mmexport"):
+        pattern = "mmexport"
+    else:
+        pattern = "wx_camera_"
 
+    epoch_timestamp = file_name.split(".")[0].replace(pattern, "")
+    epoch_timestamp = int(epoch_timestamp) // 1000
+    dt_object = datetime.datetime.utcfromtimestamp(epoch_timestamp)
+    return dt_object.strftime('%Y%m%d')
 
 def read_photo_date(file_name):
     """
@@ -114,11 +151,13 @@ def read_photo_date(file_name):
     # Open image file for reading (binary mode)
     fd = open(file_name, 'rb')
 
-    # Return Exif tags
-    
     try:
-        tags = exifread.process_file(fd)
-        date_time = tags['EXIF DateTimeOriginal']
+        if is_wechat_file(file_name):
+            date_time = get_wechat_file_date(file_name)
+        else:   
+            # Return Exif tags
+            tags = exifread.process_file(fd)
+            date_time = tags['EXIF DateTimeOriginal']
     except KeyError:
         date_time  = get_timestamp_from_mp4(os.path.basename(file_name))
         if date_time == "":
@@ -129,7 +168,6 @@ def read_photo_date(file_name):
         if date_time == "":
             # date time info is not valid in exif, try to get file's create time
             date_time = get_file_modification_time(file_name)
-    
 
     log(str(date_time) + "--->" + str(file_name))
 
@@ -158,7 +196,7 @@ def mkdir(directory):
 
 def scan_folder(base_folder):
     """
-    main entry to the tool, traverse the directory tree,
+    main entry to the tool, traverse the directory tree
     """
     start_time = time.time()
     for dirpaths, dirnames, filenames in os.walk(base_folder):
@@ -170,6 +208,7 @@ def scan_folder(base_folder):
                 copy(src_file_path, target_folder, fname)
     time_elapsed = time.time() - start_time
     print(str(time_elapsed) + " seconds used")
+
 
 def is_accept_type(file_name):
     """
@@ -209,7 +248,7 @@ def copy(src_file_name, target_folder, file_name):
             entry = os.path.join(target_folder, file_in_target)
             target_md5 = md5(entry)
             if src_md5 == target_md5:
-                log("(" + str(CURRENT_PROGRESS) + "/" + str(TOTAL_FILE_NUM) + file_name + "file exists, ignore COPY. <-- " + src_file_name)
+                log("(" + str(CURRENT_PROGRESS) + "/" + str(TOTAL_FILE_NUM) + ") "+ file_name + " file exists, ignore COPY. <-- ")
                 return
 
         word_list = file_name.split('.')
@@ -248,8 +287,8 @@ def initialize():
 
 initialize()
 scan_folder(SRC_DIR)
-
 print ("### END")
+
 
 
 
